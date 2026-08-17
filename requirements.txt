@@ -1,0 +1,4 @@
+requests
+beautifulsoup4
+fastf1
+python-dotenv
