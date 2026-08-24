@@ -43,7 +43,7 @@ def download(url, out_dir):
     filename = unquote(url.split("/")[-1])
     destination = Path(out_dir) / filename
     if destination.exists():
-        return dest, "cached"
+        return destination, "cached"
     time.sleep(1.5)
     r = requests.get(url, headers=UA, timeout=60)
     r.raise_for_status()
