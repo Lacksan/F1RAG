@@ -37,3 +37,16 @@ def pdf_url(season_url, event):
         if "car" in href.lower() and "presentation" in href.lower():
             return href if href.startswith("https") else Base_url + href
     return None
+
+def download(url, out_dir):
+    """input is pdf url and destination folder, builds file name skips download if file already downloaded, otherwise downloads and saves in destination directory"""
+    filename = unquote(url.split("/")[-1])
+    destination = Path(out_dir) / filename
+    if destination.exists():
+        return dest, "cached"
+    time.sleep(1.5)
+    r = requests.get(url, headers=UA, timeout=60)
+    r.raise_for_status()
+    destination.write_bytes(r.content) #
+    return destination, f"{len(r.content)//1024} KB" 
+
