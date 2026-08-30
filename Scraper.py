@@ -50,3 +50,29 @@ def download(url, out_dir):
     destination.write_bytes(r.content) #
     return destination, f"{len(r.content)//1024} KB" 
 
+def run(years = None, min_year=2023, out_dir="fia_cps_pdfs"):
+    Path(out_dir).mkdir(exist_ok=True) #creates output folder if it doesnt exist already, does nothing if it does
+    seasons = season_urls(min_year=min_year) # gets the dictionary of {year: season_url}, for seasons greater and equal than minimum year
+
+    if years:
+        season = {y: u for y, u in seasons.items() if y in years}
+    count = 0 # how many pdfs downloaded
+    for year, surl in seasons.items(): #loops through every season and its url
+        print(f"\n=== {year} ===")
+        for ev in events_for(surl):
+            try:
+                url = pdf_url(surl, ev)  #tries to find url
+            except requests.RequestException as e:
+                print(f"  {ev} ERROR {e}"); continue # prints error
+            if not url:
+                print(f"  {ev} (no CPS doc)"); continue
+            dest, note = download(url, out_dir) # download the pdf
+            print(f"  {ev} {dest.name}  [{note}]"); count += 1 # print result and increments pdf count
+
+    
+    print(f"\nDone. {count} PDFs in {out_dir}/") # final summary
+
+    if __name__ == "__main__":
+         # only runs if launched directly
+         yrs = [int(a) for a in sys.argv[1:]] or None
+         run(years=yrs)
