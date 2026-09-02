@@ -19,8 +19,8 @@ def season_urls(min_year=2023):
     """fetches landing page, uses regex to extract season url where years >= min year, output is dictionary {year : url}"""
     html = get(Landing)
     out = {}
-    for full in set(re.findall(r"/documents/championships/fia-formula-one-world-championship-14/season/season-(\d{4})-\d+", html)): 
-        year = int(re.search(r"season-(\d{4}))", full).group(1))
+    for full in set(re.findall(r"(/documents/championships/fia-formula-one-world-championship-14/season/season-(\d{4})-\d+)", html)): 
+        year = int(re.search(r"season-(\d{4})", full).group(1))
         if year >= min_year:
             out[year] = Base_url + full
     return dict(sorted(out.items()))
@@ -32,7 +32,7 @@ def events_for(season_url):
 
 def pdf_url(season_url, event):
     """fetches the venets page, finds all pdf links and returns the ones that contain both words 'car' and 'presentation' """
-    html = get(f"{season_url}/event{quote(event)}")
+    html = get(f"{season_url}/event/{quote(event)}")
     for href in re.findall(r'href="([^"]+\.pdf)"', html):
         if "car" in href.lower() and "presentation" in href.lower():
             return href if href.startswith("https") else Base_url + href
@@ -55,7 +55,7 @@ def run(years = None, min_year=2023, out_dir="fia_cps_pdfs"):
     seasons = season_urls(min_year=min_year) # gets the dictionary of {year: season_url}, for seasons greater and equal than minimum year
 
     if years:
-        season = {y: u for y, u in seasons.items() if y in years}
+        seasons = {y: u for y, u in seasons.items() if y in years}
     count = 0 # how many pdfs downloaded
     for year, surl in seasons.items(): #loops through every season and its url
         print(f"\n=== {year} ===")
@@ -72,7 +72,8 @@ def run(years = None, min_year=2023, out_dir="fia_cps_pdfs"):
     
     print(f"\nDone. {count} PDFs in {out_dir}/") # final summary
 
-    if __name__ == "__main__":
+if __name__ == "__main__":
+    
          # only runs if launched directly
-         yrs = [int(a) for a in sys.argv[1:]] or None
-         run(years=yrs)
+    yrs = [int(a) for a in sys.argv[1:]] or None
+    run(years=yrs)
