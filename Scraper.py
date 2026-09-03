@@ -15,15 +15,17 @@ def get(url):
     r.raise_for_status()
     return r.text
 
-def season_urls(min_year=2023):
+def season_urls(min_year=2024):
     """fetches landing page, uses regex to extract season url where years >= min year, output is dictionary {year : url}"""
     html = get(Landing)
     out = {}
-    for full in set(re.findall(r"(/documents/championships/fia-formula-one-world-championship-14/season/season-(\d{4})-\d+)", html)): 
-        year = int(re.search(r"season-(\d{4})", full).group(1))
+    pattern =r"(/documents/championships/fia-formula-one-world-championship-14/season/season-(\d{4})-\d+)"
+    for full, yr in set(re.findall(pattern, html)):
+        year = int(yr)
         if year >= min_year:
             out[year] = Base_url + full
-    return dict(sorted(out.items()))
+    return dict(sorted(out.items())) 
+       
 
 def events_for(season_url):
     """fetches url page, extracts every event name and decodes the URL encoding"""
@@ -50,7 +52,7 @@ def download(url, out_dir):
     destination.write_bytes(r.content) #
     return destination, f"{len(r.content)//1024} KB" 
 
-def run(years = None, min_year=2023, out_dir="fia_cps_pdfs"):
+def run(years = None, min_year=2024, out_dir="fia_cps_pdfs"):
     Path(out_dir).mkdir(exist_ok=True) #creates output folder if it doesnt exist already, does nothing if it does
     seasons = season_urls(min_year=min_year) # gets the dictionary of {year: season_url}, for seasons greater and equal than minimum year
 
